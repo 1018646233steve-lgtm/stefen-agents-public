@@ -1,0 +1,13 @@
+2025-07-01 10:00:00.000  INFO 12345 --- [main] c.e.demo.DemoApplication        : Started DemoApplication in 1.2 seconds
+2025-07-01 10:01:11.123 ERROR 12345 --- [http-nio-8080-exec-1] c.e.demo.web.FlakyController     : Servlet.service() for servlet [dispatcherServlet] in context with path [] threw exception [Request processing failed; nested exception is java.lang.NullPointerException: Cannot invoke "String.length()" because "s" is null] with root cause
+java.lang.NullPointerException: Cannot invoke "String.length()" because "s" is null
+    at c.e.demo.service.FlakyService.process(FlakyService.java:42)
+    at c.e.demo.web.FlakyController.flaky(FlakyController.java:28)
+2025-07-01 10:01:20.000  INFO 12345 --- [http-nio-8080-exec-3] c.e.demo.web.FlakyController     : GET /api/ping -> 200
+2025-07-01 10:01:33.888 ERROR 12345 --- [http-nio-8080-exec-2] c.e.demo.web.FlakyController     : Servlet.service() for servlet [dispatcherServlet] in context with path [] threw exception [Request processing failed; nested exception is java.lang.IllegalStateException: boom] with root cause
+java.lang.IllegalStateException: boom
+    at c.e.demo.service.FlakyService.boom(FlakyService.java:31)
+    at c.e.demo.web.FlakyController.boom(FlakyController.java:36)
+2025-07-01 10:02:01.002 ERROR 12345 --- [http-nio-8080-exec-5] c.e.demo.web.FlakyController     : Servlet.service() for servlet [dispatcherServlet] in context with path [] threw exception [Request processing failed; nested exception is java.lang.OutOfMemoryError: Java heap space] with root cause
+java.lang.OutOfMemoryError: Java heap space
+    at c.e.demo.service.MemoryLeakService.fill(MemoryLeakService.java:70)

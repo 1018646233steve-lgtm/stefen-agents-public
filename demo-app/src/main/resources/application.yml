@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: demo-app
+
+server:
+  port: ${PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+# 日志输出到文件: 本地默认 ./logs/app.log, 服务器由 systemd 注入 APP_LOG
+# 文件日志使用 Spring Boot 默认 pattern(含时间戳/级别/线程/logger + 完整堆栈),
+# monitor/scan_logs.sh 依赖其中的 "ERROR/Exception/OutOfMemoryError" 行与堆栈缩进。
+logging:
+  file:
+    name: ${APP_LOG:./logs/app.log}

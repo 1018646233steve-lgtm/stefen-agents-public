@@ -1,0 +1,14 @@
+# aiops monitor —— 每 60s 触发一轮监控
+# OnCalendar=*:0/1 表示每分钟的第 0 秒触发
+[Unit]
+Description=Run aiops monitor every minute
+Requires=aiops-monitor.service
+
+[Timer]
+OnBootSec=1min
+OnCalendar=*:0/1
+Persistent=true
+Unit=aiops-monitor.service
+
+[Install]
+WantedBy=timers.target

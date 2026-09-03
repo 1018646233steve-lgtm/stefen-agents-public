@@ -1,0 +1,120 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://aiops.dev/contracts/report.schema.json",
+  "title": "AnalysisReport (分析报告) — 契约 v1",
+  "description": "AI 分析平面(OpenClaw 官方 agent 或自研 agent)对某个 Incident 的分析结论。任何实现该契约的 agent 都应消费 Incident 并产出本对象。",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schemaVersion",
+    "reportId",
+    "incidentId",
+    "agent",
+    "analyzedAt",
+    "summary",
+    "severity",
+    "rootCause",
+    "evidence",
+    "impact",
+    "fixSuggestions",
+    "confidence",
+    "status"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "v1"
+    },
+    "reportId": {
+      "type": "string",
+      "pattern": "^rpt-[0-9]{8}-[0-9]{4}$",
+      "description": "报告唯一 ID"
+    },
+    "incidentId": {
+      "type": "string",
+      "description": "关联的事件 ID（incident.schema.json）"
+    },
+    "agent": {
+      "type": "string",
+      "description": "产出报告的 agent 标识，用于 A/B 对比，例如 openclaw-official / self-built-ts / self-built-java"
+    },
+    "model": {
+      "type": "string",
+      "description": "实际使用的模型名（成本与质量审计用）"
+    },
+    "analyzedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "summary": {
+      "type": "string",
+      "description": "一句话结论，放在 UI 列表页"
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["critical", "high", "medium", "low"],
+      "description": "agent 复核后的事件严重度(可与 Incident 不一致)"
+    },
+    "classification": {
+      "type": "string",
+      "enum": ["code_bug", "resource_exhaustion", "config_error", "dependency_outage", "data_issue", "false_positive", "unknown"],
+      "description": "根因类别，便于 UI 聚合统计"
+    },
+    "rootCause": {
+      "type": "string",
+      "description": "根因分析正文"
+    },
+    "evidence": {
+      "type": "array",
+      "description": "证据链。★硬性要求：每条证据必须可溯源(指向真实日志行/指标/代码位置)，禁止无出处断言。",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["type", "content", "location", "timestamp"],
+        "properties": {
+          "type": { "type": "string", "enum": ["log", "metric", "code", "commit", "config", "other"] },
+          "content": { "type": "string", "description": "证据原文(日志行/指标值/代码片段)，须真实" },
+          "location": { "type": "string", "description": "出处: 文件:行号 / 日志文件偏移 / commit sha / 指标名" },
+          "timestamp": { "type": "string", "description": "证据发生时间，可空则填 unknown" }
+        }
+      }
+    },
+    "impact": {
+      "type": "string",
+      "description": "影响面：哪些接口/功能受影响，用户可感知吗"
+    },
+    "fixSuggestions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["action", "detail", "confidence"],
+        "properties": {
+          "action": { "type": "string", "description": "修复动作类别，例如 code_change / restart / scale_up / config_change / rollback" },
+          "detail": { "type": "string", "description": "具体做法（可到代码行级）" },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1, "description": "该建议置信度 0-1" }
+        }
+      }
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "整体置信度。低置信度(如证据不足)时必须如实给低分并在 summary 中说明"
+    },
+    "openQuestions": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "证据不足、需要人工确认的问题"
+    },
+    "rawAnalysis": {
+      "type": "string",
+      "description": "agent 的完整分析文本(可选，便于人工审阅细节)"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["new", "confirmed", "resolved", "false_positive"],
+      "description": "人工处置状态，默认 new，由 UI 人工流转"
+    }
+  }
+}

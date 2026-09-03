@@ -1,0 +1,11 @@
+# aiops monitor —— 每轮一次的数据平面监控(oneshot, 由 timer 触发)
+# 安装: 见 deploy/README.md
+[Unit]
+Description=aiops monitor one-shot run (metrics + log scan + resource check)
+
+[Service]
+Type=oneshot
+User=aiops
+Group=aiops
+ExecStart=/opt/aiops/monitor/run_once.sh
+# 日志由脚本写 stdout/stderr, 通过 journalctl -u aiops-monitor.service 查看

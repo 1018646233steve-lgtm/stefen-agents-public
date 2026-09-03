@@ -1,0 +1,16 @@
+# 运行产物
+.aiops/
+monitor/state/
+monitor/test/tmp/
+demo-app/logs/
+demo-app/target/
+*.log
+*.pid
+# 例外: monitor 测试的样例日志 fixture 是仓库的一部分(测试依赖它), 不可忽略
+!monitor/test/fixtures/*.log
+
+# IDE
+.idea/
+.vscode/
+*.iml
+.DS_Store

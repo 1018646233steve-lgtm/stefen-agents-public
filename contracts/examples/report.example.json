@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "v1",
+  "reportId": "rpt-20250701-0001",
+  "incidentId": "inc-20250701-0001",
+  "agent": "openclaw-official",
+  "model": "claude-sonnet-4",
+  "analyzedAt": "2025-07-01T10:24:05Z",
+  "summary": "demo-app /api/boom 接口每次调用必抛 IllegalStateException，属代码缺陷而非环境问题；修复点在 FlakyService.boom 第 31 行的显式 throw。",
+  "severity": "high",
+  "classification": "code_bug",
+  "rootCause": "FlakyService.boom() 无条件 throw new IllegalStateException(\"boom\")（FlakyService.java:31），由 FlakyController.boom()（FlakyController.java:36）直接调用且未捕获。日志证据显示异常由 dispatcherServlet 捕获后以 500 响应返回，无任何环境/资源相关异常，故判定为确定性代码缺陷。",
+  "evidence": [
+    {
+      "type": "log",
+      "content": "java.lang.IllegalStateException: boom\n\tat c.e.demo.service.FlakyService.boom(FlakyService.java:31)\n\tat c.e.demo.web.FlakyController.boom(FlakyController.java:36)",
+      "location": "app.log 10:23:11.123 (incident inc-20250701-0001 logExcerpt)",
+      "timestamp": "2025-07-01T10:23:11Z"
+    },
+    {
+      "type": "code",
+      "content": "FlakyService.java:31 -> throw new IllegalStateException(\"boom\");",
+      "location": "demo-app/src/main/java/com/example/demo/service/FlakyService.java:31",
+      "timestamp": "unknown"
+    },
+    {
+      "type": "metric",
+      "content": "cpuPct=12.5, memUsedPct=12.5 → 资源充足，排除资源耗尽型根因",
+      "location": "incident inc-20250701-0001 metrics",
+      "timestamp": "2025-07-01T10:23:12Z"
+    }
+  ],
+  "impact": "GET /api/boom 100% 返回 500；该接口为故障注入演示接口，不影响其他业务路径（/api/ping 正常）。",
+  "fixSuggestions": [
+    {
+      "action": "code_change",
+      "detail": "删除 FlakyService.boom() 中的显式 throw，或改为按概率抛异常（与 /api/flaky 一致），使该接口仅在注入故障时失败。",
+      "confidence": 0.95
+    }
+  ],
+  "confidence": 0.9,
+  "openQuestions": [
+    "若 /api/boom 在真实环境应为可用接口，需确认其业务语义"
+  ],
+  "rawAnalysis": "…(agent 完整分析文本，可空)",
+  "status": "new"
+}

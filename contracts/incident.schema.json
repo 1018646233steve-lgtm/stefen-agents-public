@@ -1,0 +1,89 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://aiops.dev/contracts/incident.schema.json",
+  "title": "Incident (事件) — 契约 v1",
+  "description": "由监控平面(monitor/)检测到的、值得交给 AI 分析平面处理的异常事件。分析平面(OpenClaw 或自研 agent)消费本对象，产出 AnalysisReport。",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "incidentId",
+    "schemaVersion",
+    "app",
+    "env",
+    "severity",
+    "type",
+    "firstSeenAt",
+    "count",
+    "signature",
+    "logExcerpt",
+    "metrics",
+    "status"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "v1",
+      "description": "契约版本。破坏性变更必须升版本，不得原地改语义。"
+    },
+    "incidentId": {
+      "type": "string",
+      "pattern": "^inc-[0-9]{8}-[0-9]{4}$",
+      "description": "全局唯一事件 ID，格式: inc-YYYYMMDD-序号"
+    },
+    "app": {
+      "type": "string",
+      "description": "被监控应用名"
+    },
+    "env": {
+      "type": "string",
+      "enum": ["local", "dev", "staging", "prod"],
+      "description": "运行环境"
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["critical", "high", "medium", "low"],
+      "description": "严重度: OOM/FATAL→critical, ERROR/SEVERE→high, 其他→medium"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["exception", "oom", "cpu", "memory", "unknown"],
+      "description": "事件类型，agent 可据此选择分析策略"
+    },
+    "firstSeenAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "首次发现时间(UTC ISO8601)"
+    },
+    "count": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "该签名在当前扫描批次内的出现次数(去抖窗口内只发一次事件，count 记录批次内次数)"
+    },
+    "signature": {
+      "type": "string",
+      "description": "归一化后的异常签名(去时间戳/线程ID/行号)，用于去抖与后续聚合"
+    },
+    "logExcerpt": {
+      "type": "string",
+      "description": "日志摘录：触发行 + 堆栈前若干行(默认最多10行)。上下文裁剪是刻意的：agent 需要更多时通过 skill 按需拉取。"
+    },
+    "metrics": {
+      "type": "object",
+      "description": "事件发生时的服务器指标快照(与事件本身同时刻生成，供 agent 关联分析)",
+      "properties": {
+        "ts": { "type": "string", "format": "date-time" },
+        "cpuPct": { "type": "number", "description": "CPU 使用率 0-100" },
+        "memUsedMb": { "type": "number" },
+        "memTotalMb": { "type": "number" },
+        "memUsedPct": { "type": "number", "description": "内存使用率 0-100" },
+        "loadAvg1": { "type": "number" }
+      },
+      "required": ["ts", "cpuPct", "memUsedMb", "memTotalMb", "memUsedPct"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["new", "analyzing", "analyzed", "ignored"],
+      "description": "消费状态机: new(监控生成) → analyzing(agent 领取) → analyzed(已出报告) / ignored(人工忽略)。Phase 4 后端负责维护，Phase 3 之前恒为 new。"
+    }
+  }
+}

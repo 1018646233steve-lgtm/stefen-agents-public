@@ -1,0 +1,29 @@
+# aiops demo-app —— Spring Boot 示例应用
+# 安装(以 aiops 用户):
+#   mvn -f demo-app/pom.xml clean package
+#   mkdir -p /opt/aiops/demo-app
+#   cp demo-app/target/demo-app-0.0.1-SNAPSHOT.jar /opt/aiops/demo-app/demo-app.jar
+#   sudo cp deploy/systemd/aiops-app.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now aiops-app
+[Unit]
+Description=aiops demo spring boot app (故障注入靶场)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=aiops
+Group=aiops
+WorkingDirectory=/opt/aiops/demo-app
+ExecStart=/usr/bin/java -jar /opt/aiops/demo-app/demo-app.jar
+Environment=PORT=8080
+Environment=APP_LOG=/var/log/aiops/app.log
+Restart=always
+RestartSec=5
+
+# 安全加固(可选): 见 systemd.exec(5)
+NoNewPrivileges=true
+ProtectSystem=full
+ReadWritePaths=/var/log/aiops
+
+[Install]
+WantedBy=multi-user.target
