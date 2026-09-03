@@ -105,8 +105,10 @@ bash monitor/test/run_local_test.sh
 
 - [x] Phase 0/1/2 脚手架：契约、监控脚本、示例应用、部署骨架（本仓库）
 - [x] 本地全链路验证：真实 `demo-app` 日志 → Incident（2026-09-03，11 条 ERROR → 2 个 Incident）
+- [x] Phase 3 本地 spike：OpenClaw + DeepSeek(Anthropic 兼容端点) + 3 skill + cron 事件驱动分析
+      （3 个 Incident 全部自动分析并产出契约 v1 报告；详见 `worker/openclaw-spike/README.md`）
 - [ ] 按 [docs/roadmap.md](docs/roadmap.md) 买服务器并执行 deploy/bootstrap-server.sh
-- [ ] Phase 3：部署 OpenClaw、写三个 skill、接 Incident 队列
+- [ ] Phase 3（服务器）：OpenClaw launchd/systemd 常驻、接真实 demo-app 日志、通知渠道
 - [ ] Phase 4：自建 Spring Boot 存储/UI 后端
 - [ ] Phase 5：按契约自研可替换的 Agent
 

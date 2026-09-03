@@ -1,0 +1,56 @@
+{
+  // =====================================================================
+  // OpenClaw spike 配置模板(JSON5)。
+  // 用法: 复制为 OPENCLAW_HOME 下的 openclaw.json(默认 ~/.openclaw/openclaw.json),
+  //       填入真实 DEEPSEEK_API_KEY, 再 openclaw config validate / gateway restart。
+  // 键名依据 openclaw 仓库 docs/gateway/* 与 docs/concepts/model-providers.md
+  // (调研备忘: /Users/stefenagents/openclaw-spike-notes.md §2.1)。
+  // =====================================================================
+
+  // 密钥: 优先用 ~/.openclaw/.env 里的 DEEPSEEK_API_KEY; 此处仅兜底
+  env: {
+    vars: {
+      // AIOPS 数据平面路径(本机 spike; 服务器部署时换成 /var/lib/aiops 等)
+      AIOPS_INCIDENT_DIR: "/Users/stefenagents/stefen-agents/worker/openclaw-spike/.data/incidents",
+      AIOPS_STATE_DIR: "/Users/stefenagents/stefen-agents/worker/openclaw-spike/.data/state",
+      AIOPS_APP_LOG: "/Users/stefenagents/stefen-agents/worker/openclaw-spike/.data/logs/app.log",
+      AIOPS_REPORTS_DIR: "/Users/stefenagents/stefen-agents/worker/openclaw-spike/.data/reports",
+      // AIOPS_REPORT_WEBHOOK: "http://127.0.0.1:8899/reports", // Phase 4 后端就绪后打开
+    },
+  },
+
+  models: {
+    mode: "merge",
+    providers: {
+      // 自定义 Anthropic 兼容端点(DeepSeek Anthropic 端点)
+      ds: {
+        api: "anthropic-messages", // 适配器最终请求 <baseUrl>/v1/messages
+        baseUrl: "https://api.deepseek.com/anthropic",
+        apiKey: "${DEEPSEEK_API_KEY}",
+        models: [
+          {
+            id: "deepseek-v4-flash", // 已实测: DeepSeek Anthropic 端点接受该 id (v4-pro 亦可)
+            name: "DeepSeek V4 Flash via Anthropic endpoint",
+            input: ["text"],
+            contextWindow: 131072,
+            maxTokens: 8192,
+          },
+        ],
+      },
+    },
+  },
+
+  agents: {
+    defaults: {
+      model: { primary: "ds/deepseek-v4-flash" },
+    },
+    entries: {
+      monitor: {
+        name: "monitor",
+        model: "ds/deepseek-v4-flash",
+        // workspace 即本仓库的 openclaw workspace: AGENTS.md 会被引导注入, skills/ 会被加载
+        workspace: "/Users/stefenagents/stefen-agents/worker/openclaw-spike/workspace",
+      },
+    },
+  },
+}

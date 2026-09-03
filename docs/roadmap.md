@@ -35,12 +35,12 @@
 ## Phase 3：OpenClaw 部署 + 官方/社区 skill 组装分析 Agent（第 3–4 周 · 产物 `worker/`）
 
 - [ ] 服务器安装 OpenClaw（Node 20+）；先 CLI/cron 模式验证，再决定是否接 Telegram
-- [ ] 写/装 3 个 skill：
-  1. `collect_metrics` —— curl actuator/prometheus 拉当前指标
-  2. `fetch_logs` —— 按 Incident 时间窗拉日志上下文（限量）
-  3. `submit_report` —— 把 AnalysisReport(契约 v1) POST 到后端
-- [ ] 配 cron：每 2–5 分钟消费一个新 Incident → 跑一次分析
-- [ ] 故意喂不完整日志，观察 agent 是否会编造证据（幻觉第一课）
+- [x] （本地 spike 已完成，2026-09-03，产物 `worker/openclaw-spike/`，详见其 README）3 个 skill：
+  1. `collect-metrics` —— 读指标快照 + 探 demo-app actuator
+  2. `fetch-logs` —— 按 Incident 时间窗拉日志上下文（限量）
+  3. `submit-report` —— AnalysisReport(契约 v1) 落盘 + Incident 状态流转
+- [x] （本地）配 cron：每 2 分钟消费新 Incident → 跑一次分析（`automations` + 条件触发器，空队列不空转）
+- [x] （本地）幻觉第一课：只喂 1 行无堆栈日志 → agent 如实降 confidence(0.7) 并列出 openQuestions，未编造
 
 **验收**：故障发生几分钟后，得到一份契约合法的 AnalysisReport，含结论/证据/根因/修复建议。
 > 本阶段开始前建议先完成本地 spike：在本地装 OpenClaw 验证「cron 触发 + 自定义 skill + 结构化输出」可行，

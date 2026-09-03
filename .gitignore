@@ -14,3 +14,13 @@ demo-app/target/
 .vscode/
 *.iml
 .DS_Store
+
+# OpenClaw spike 运行时数据
+worker/openclaw-spike/.data/
+worker/openclaw-spike/.probe/
+
+# OpenClaw 自动生成的样板/内部文件(不入库, 首次运行会自动重建)
+worker/openclaw-spike/workspace/.openclaw/
+worker/openclaw-spike/workspace/IDENTITY.md
+worker/openclaw-spike/workspace/SOUL.md
+worker/openclaw-spike/workspace/USER.md
